@@ -1,19 +1,38 @@
 import os
-from langchain_openai import OpenAI
+from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
+from langchain_core.messages import HumanMessage, SystemMessage
 
 
 class LLMService:
     def __init__(self):
-        # Aqui assumimos que há uma variável de ambiente HF_TOKEN configurada.
-        self.llm = OpenAI(
+        llm = HuggingFaceEndpoint(
+            repo_id="Qwen/Qwen2.5-7B-Instruct",
+            provider="auto",
+            huggingfacehub_api_token=os.getenv("HF_TOKEN"),
+            max_new_tokens=200,
             temperature=0.5,
             top_p=0.7,
-            api_key=os.getenv("HF_TOKEN"),  # type: ignore
-            base_url="https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct/v1",
+            task="conversational",
         )
 
-    def summarize_text(self, text: str) -> str:
-        prompt = f"{text}"
+        self.chat = ChatHuggingFace(llm=llm)
 
-        response = self.llm.invoke(prompt)
-        return response
+    def summarize_text(self, text: str, lang: str) -> str:
+
+        messages = [
+            SystemMessage(
+                content=(
+                    "You are a summarization assistant. "
+                    "Return only the summary text, with no title, no explanation, and no JSON."
+                )
+            ),
+            HumanMessage(
+                content=f"Summarize the following text in {lang}:\n\n{text}"
+            ),
+        ]
+
+        try:
+            response = self.chat.invoke(messages)
+            return response.content.strip()
+        except Exception as e:
+            raise RuntimeError(f"Erro ao resumir o texto: {str(e)}")
