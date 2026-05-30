@@ -113,6 +113,10 @@ Resposta:
   "message": "API is running"
 }
 ```
+<img width="800" height="470" alt="GET-ROOT" src="https://github.com/user-attachments/assets/4933aaca-5059-43f5-b590-893c32948702" />
+
+
+
 
 #### Python
 ```http
@@ -155,21 +159,30 @@ Resposta esperada:
   }
 }
 ```
+<img width="800" height="470" alt="POST-TASK" src="https://github.com/user-attachments/assets/c1777975-0944-4d3a-b0e5-e421884c40d1" />
+
 
 ### Listar tarefas
 ```http
 GET /tasks
 ```
+<img width="800" height="470" alt="GET-TASKS" src="https://github.com/user-attachments/assets/619f62e1-08e7-4470-9f7a-7fcef4b0c73e" />
+
+
 
 ### Buscar tarefa por ID
 ```http
 GET /tasks/:id
 ```
+<img width="800" height="470" alt="GET-TASK-ID" src="https://github.com/user-attachments/assets/bd98b2a6-0f61-4d49-be93-9e97c4fa0c06" />
+
 
 ### Remover tarefa por ID
 ```http
 DELETE /tasks/:id
 ```
+<img width="800" height="470" alt="DELETE-TASK" src="https://github.com/user-attachments/assets/0b57078a-1212-484b-88a6-65dbc96f2399" />
+
 
 ## Exemplo de uso no Postman
 
