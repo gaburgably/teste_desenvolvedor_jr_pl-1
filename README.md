@@ -1,108 +1,276 @@
 # LLM Summarizer API
 
-Este projeto é uma API Node.js desenvolvida com TypeScript e Express, que permite aos usuários submeter textos e receber resumos gerados por um serviço Python utilizando LangChain.
-O resumo gerado é salvo com o texto original e a versao resumida e traduzido conforme o idioma solicitado pelo usuário.
+API desenvolvida em **Node.js + TypeScript + Express** com um serviço Python em **FastAPI** para geração de resumos com suporte a idioma solicitado pelo usuário. O fluxo da aplicação recebe um texto, envia para o serviço Python, gera um resumo no idioma desejado e persiste os dados da tarefa em arquivo JSON.
 
-## Estrutura do Projeto
+## Objetivo do projeto
 
-- **node-api/**: Contém a implementação da API Node.js.
-  - **src/**: Contém o código-fonte da API.
-    - **app.ts**: Ponto de entrada da aplicação.
-    - **index.ts**: Inicia o servidor.
-    - **routes/**: Define as rotas da API.
-      - **tasksRoutes.ts**: Gerencia as rotas relacionadas a tarefas.
-    - **repositories/**: Gerencia as tarefas em memória.
-      - **tasksRepository.ts**: Implementa a lógica de armazenamento de tarefas.
-- **python-llm/**: Contém a implementação do serviço Python.
-  - **app/**: Contém o código-fonte do serviço Python.
-    - **main.py**: Ponto de entrada da aplicação FastAPI.
-    - **services/**: Implementa a lógica de resumo de texto.
-      - **llm_service.py**: Interage com LangChain para gerar resumos.
+Este projeto foi desenvolvido para atender ao desafio técnico descrito no README original. A aplicação permite:
 
-## Environment
+- Criar tarefas de resumo via `POST /tasks`.
+- Listar todas as tarefas via `GET /tasks`.
+- Consultar uma tarefa específica via `GET /tasks/:id`.
+- Remover uma tarefa via `DELETE /tasks/:id`.
+- Persistir os dados das tarefas em arquivo JSON.
+- Gerar o resumo no idioma solicitado: `pt`, `en` ou `es`.
 
-**HF_TOKEN**: Token de acesso ao Hugging Face(https://huggingface.co/settings/tokens). Caso não tenha, crie uma conta e gere um token(gratuito).
+## Arquitetura
 
-## Como Executar
+O projeto está dividido em dois serviços:
 
-1. Clone o repositório.
-2. Navegue até o diretório do projeto.
-3. Instale as dependências dos projetos Node.js e Python:
-   ```bash
-   ./setup.sh install-node
-   ./setup.sh install-python
-   ```
-4. Inicie a API Node.js e o serviço Python:
-   ```bash
-   ./setup.sh start-node
-   ./setup.sh start-python
-   ```
-5. A API estará disponível em `http://localhost:3005`.
+### `node-api/`
+Responsável por expor a API principal, validar os dados recebidos, integrar com o serviço Python e persistir as tarefas.
 
-## Endpoints
+Principais responsabilidades:
+- validar `text` e `lang`;
+- rejeitar idiomas não suportados com status `400`;
+- criar, listar, consultar e remover tarefas;
+- salvar as tarefas em arquivo JSON.
 
-- POST **/tasks**: Cria uma nova tarefa com o texto a ser resumido.
-- GET **/tasks**: Lista todas as tarefas criadas.
+### `python-llm/`
+Responsável por receber o texto e o idioma, montar o prompt e retornar o resumo em formato JSON.
 
-# Tarefas a serem realizadas
+Principais responsabilidades:
+- receber `text` e `lang`;
+- montar o prompt de resumo com LangChain;
+- solicitar a geração do resumo;
+- retornar a resposta no formato:
 
-### No projeto Node.js
-
-- No POST **/tasks**, a API deve receber um texto e um idioma e enviar para o serviço Python para gerar o resumo no idioma solicitado.
-
-  #### Parâmetros que devem ser recebidos pela API:
-
-  - `text`: Texto a ser resumido.
-  - `lang`: Idioma para qual o texto original deve ser traduzido.
-
-  #### Idiomas suportados:
-
-  - `pt`: Português.
-  - `en`: Inglês.
-  - `es`: Espanhol.
-  - Caso o idioma não seja suportado, retornar um erro com status 400 e a mensagem "Language not supported".
-
-- Deve ser possível acessar o resumo de uma tarefa através do endpoint GET **/tasks/:id**.
-
-  ### Deve retornar um JSON com as propriedades:
-
-  - `id`: Identificador da tarefa.
-  - `text`: Texto original.
-  - `summary`: Resumo gerado pelo serviço Python.
-  - `lang`: Idioma para qual o texto foi traduzido(solicitado pelo usuário).
-
-- Deve ser possível remover uma tarefa através do endpoint DELETE **/tasks/:id**.
-- Persistir as informações das tarefas em um arquivo JSON.
-
-### No projeto Python
-
-- Implementar a lógica de resumo de texto utilizando LangChain(Prompt) no idioma solicitado.
-  ### O resumo deve ser retornado em formato JSON, com a propriedades:
-  - `summary`: Resumo gerado.
-
-## Em ambos os projetos
-
-- Deve possuir uma rota inicial(/) que retorne um JSON com a propriedade `message` contendo a mensagem "API is running".
-
-### Observações
-
-- Após a conclusão, suba o projeto no seu repositório pessoal e envie o link para o recrutador.
-- Caso tenha alguma dúvida, entre em contato com o recrutador.
-
-## Texto de Exemplo
-
+```json
+{
+  "summary": "Resumo gerado"
+}
 ```
-Diagnósticos médicos e decisões jurídicas: o papel da IA
-A justiça e a Medicina são considerados campos de alto risco. Neles é mais urgente do que em qualquer outra área estabelecer sistemas para que os humanos tenham sempre a decisão final.
 
-Os especialistas em IA trabalham para garantir a confiança dos usuários, para que o sistema seja transparente, que proteja as pessoas e que os humanos estejam no centro das decisões.
+## Tecnologias utilizadas
 
-Aqui entra em jogo o desafio do "doutor centauro". Centauros são modelos híbridos de algoritmo que combinam análise formal de máquina e intuição humana.
+### Node.js
+- Node.js
+- TypeScript
+- Express
 
-Um "médico centauro + um sistema de IA" melhora as decisões que os humanos tomam por conta própria e que os sistemas de IA tomam por conta própria.
+### Python
+- FastAPI
+- Uvicorn
+- LangChain
+- Hugging Face
+- python-dotenv
 
-O médico sempre será quem aperta o botão final; e o juiz quem determina se uma sentença é justa.
+## Variáveis de ambiente
+
+No serviço Python, crie um arquivo `.env` dentro de `python-llm/` com:
+
+```env
+HF_TOKEN=seu_token_aqui
 ```
-FONTE: https://www.bbc.com/portuguese/articles/c2kx2e74jyxo
 
-# Desejamos um bom desafio! 🚀
+> O token deve ser gerado em: [Hugging Face Access Tokens](https://huggingface.co/settings/tokens)
+
+## Como instalar
+
+Na raiz do projeto, execute:
+
+```bash
+./setup.sh install-node
+./setup.sh install-python
+```
+
+## Como executar
+
+Em dois terminais separados, execute:
+
+### Terminal 1 — Node API
+```bash
+./setup.sh start-node
+```
+
+### Terminal 2 — Python API
+```bash
+./setup.sh start-python
+```
+
+A API principal ficará disponível em:
+
+```text
+http://localhost:3005
+```
+
+O serviço Python ficará disponível em:
+
+```text
+http://localhost:8000
+```
+
+## Rotas disponíveis
+
+### Rota inicial
+#### Node
+```http
+GET /
+```
+Resposta:
+```json
+{
+  "message": "API is running"
+}
+```
+
+#### Python
+```http
+GET /
+```
+Resposta:
+```json
+{
+  "message": "API is running"
+}
+```
+
+### Criar tarefa
+```http
+POST /tasks
+```
+
+Body:
+```json
+{
+  "text": "Seu texto aqui",
+  "lang": "en"
+}
+```
+
+Idiomas suportados:
+- `pt` → Português
+- `en` → Inglês
+- `es` → Espanhol
+
+Resposta esperada:
+```json
+{
+  "message": "Tarefa criada com sucesso!",
+  "task": {
+    "id": 1,
+    "text": "Seu texto aqui",
+    "summary": "Generated summary...",
+    "lang": "en"
+  }
+}
+```
+
+### Listar tarefas
+```http
+GET /tasks
+```
+
+### Buscar tarefa por ID
+```http
+GET /tasks/:id
+```
+
+### Remover tarefa por ID
+```http
+DELETE /tasks/:id
+```
+
+## Exemplo de uso no Postman
+
+### POST `/tasks`
+URL:
+```text
+http://localhost:3005/tasks
+```
+
+Headers:
+```text
+Content-Type: application/json
+```
+
+Body:
+```json
+{
+  "text": "Diagnósticos médicos e decisões jurídicas: o papel da IA. A justiça e a Medicina são campos de alto risco.",
+  "lang": "pt"
+}
+```
+
+## Regras de validação
+
+- `text` é obrigatório.
+- `lang` é obrigatório.
+- Apenas `pt`, `en` e `es` são aceitos.
+- Caso o idioma seja inválido, a API retorna:
+
+```json
+{
+  "error": "Language not supported"
+}
+```
+
+com status HTTP `400`.
+
+## O que foi implementado
+
+### Node API
+- Rota `GET /` para health check.
+- Rota `POST /tasks` com validação de `text` e `lang`.
+- Integração com o serviço Python.
+- Rota `GET /tasks` para listar tarefas.
+- Rota `GET /tasks/:id` para consultar uma tarefa específica.
+- Rota `DELETE /tasks/:id` para remover tarefas.
+- Persistência das tarefas em arquivo JSON.
+
+### Python API
+- Rota `GET /` para health check.
+- Rota `POST /summarize`.
+- Recebimento dos campos `text` e `lang`.
+- Geração de resumo com prompt estruturado.
+- Retorno em JSON com a propriedade `summary`.
+
+## Ajustes e correções realizadas
+
+Durante o desenvolvimento, foram feitos os seguintes ajustes:
+
+- Inclusão do campo `lang` na estrutura das tarefas.
+- Implementação de persistência em arquivo JSON, em vez de armazenamento apenas em memória.
+- Criação das rotas `GET /tasks/:id` e `DELETE /tasks/:id`.
+- Adição da rota inicial `/` em ambos os serviços.
+- Tratamento de erro para idioma não suportado.
+- Ajuste do fluxo entre Node e Python para interpretar corretamente erros do serviço Python.
+- Correção do formato de resposta do Python para retornar JSON com `summary`.
+- Atualização das dependências Python para suportar a integração necessária.
+- Ajuste da lógica do serviço de resumo para funcionar corretamente com Hugging Face.
+
+## Estrutura do projeto
+
+```text
+.
+├── node-api/
+│   ├── src/
+│   │   ├── app.ts
+│   │   ├── index.ts
+│   │   ├── repositories/
+│   │   │   └── tasksRepository.ts
+│   │   └── routes/
+│   │       └── tasksRoutes.ts
+│   └── ...
+├── python-llm/
+│   ├── app/
+│   │   ├── main.py
+│   │   └── services/
+│   │       └── llm_service.py
+│   └── ...
+└── setup.sh
+```
+
+## Status final
+
+Requisitos funcionais implementados:
+
+- [x] `POST /tasks`
+- [x] `GET /tasks`
+- [x] `GET /tasks/:id`
+- [x] `DELETE /tasks/:id`
+- [x] Persistência em arquivo JSON
+- [x] Suporte a idiomas `pt`, `en`, `es`
+- [x] Erro `400` para idioma inválido
+- [x] Rota inicial `/` nos dois serviços
+- [x] Resposta JSON com `summary` no serviço Python
