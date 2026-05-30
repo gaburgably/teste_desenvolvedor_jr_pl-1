@@ -56,10 +56,10 @@ case $1 in
         install_node
         install_python
         ;;
-    dev-node)
+    start-node)
         dev_node
         ;;
-    dev-python)
+    start-python)
         dev_python
         ;;
     *)
@@ -67,7 +67,7 @@ case $1 in
         echo "  install-node     - Instala dependências do Node.js"
         echo "  install-python   - Instala dependências do Python"
         echo "  install          - Instala todas as dependências"
-        echo "  dev-node         - Inicia o servidor Node.js no modo dev"
-        echo "  dev-python       - Inicia o servidor Python no modo dev"
+        echo "  start-node         - Inicia o servidor Node.js no modo dev"
+        echo "  start-python       - Inicia o servidor Python no modo dev"
         ;;
 esac
